@@ -9,6 +9,6 @@ The Node.js Starter demonstrates a simple, reusable Node.js web application base
 3. cd into the app directory
 4. Run `npm install` to install the app's dependencies
 5. Run `npm start` to start the app
-6. Access the running app in a browser at http://localhost:6001
+6. Access the running app in a browser at http://localhost:3000
 
 [Install Node.js]: https://nodejs.org/en/download/
