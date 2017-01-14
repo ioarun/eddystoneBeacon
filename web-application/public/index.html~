@@ -1,0 +1,44 @@
+<html>
+<head>
+<title>eMote Server</title>
+<script src="plotly-latest.min.js"></script>
+<link rel="stylesheet" href="style.css">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+<script>
+$.ajax( { url: "https://api.mongolab.com/api/1/databases/mydb/collections/test?apiKey=CM-x_SrL-88CIOt3rbzX5_K0cdceAzxO",
+		  data: JSON.stringify( { "x" : 1 } ),
+		  type: "PUT",
+		  contentType: "application/json" } );
+</script>
+</head>
+<body>
+	<div id="header" style = "background-color:black;
+    	color:white;
+    	text-align:center;
+    	padding:5px;">
+	<h1>Nike - What's New?</h1>
+	</div>
+	
+	<div id="photo">
+	<h2>Nike Shoes</h2>
+	<img src = "photo.jpg">
+	</div>
+
+	<div id="graph" style="width:600px;height:250px;">
+		<h2>Sales this month</h2>
+		<script>
+			TESTER = document.getElementById('graph');
+			Plotly.plot( TESTER, [{
+			x: [1, 2, 3, 4, 5],
+			y: [1, 2, 4, 8, 16] }], {
+			margin: { t: 0 } } );
+		</script>
+	</div>
+
+	<div id="footer">
+	Copyright © eMote
+	</div>
+	
+	
+</body>
+

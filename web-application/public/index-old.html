@@ -1,0 +1,155 @@
+
+  <html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Web Bluetooth demo</title>
+    <script src="jquery-1.4.1.min.js"></script>
+  </head>
+  <body>
+      <form>
+         <input type="button" onclick="start()" value="Connect">
+      </form>
+      <p id="textViewer"></p>
+      <form>
+         <input type="button" id="writeButton" value="Send">
+      </form>
+      <form>
+         <input type="button" onclick="onStopButtonClick()" value="Stop Notification">
+      </form>
+       <form>
+         <input type="button" onclick="onDisconnect()" value="Disconnect">
+      </form>
+    <script>
+    'use strict';
+  var bleService;
+  var myCharacteristic;
+  var writeCharacteristic;
+  var bluetoothDevice;
+  //var busy = false;
+    function start(){
+      bluetoothDevice = null;
+      var writeButton = document.querySelector('#writeButton');
+      navigator.bluetooth.requestDevice({ filters: [{ services: [ '713d0000-503e-4c75-ba94-3148f18d941e' ] }] }) //6b536574-6152-7472-6165-48091000180d
+      .then(device => {
+        bluetoothDevice = device;
+  // Human-readable name of the device.
+  //alert(device.name);
+  // Filtered UUIDs of GATT services the website origin has access to.
+  //alert(device.uuids);
+  //document.getElementById("textViewer").innerHTML = device.name;
+  //document.getElementById("textViewer").innerHTML = device.uuids;
+
+  // Attempts to connect to remote GATT Server.
+  return bluetoothDevice.connectGATT();
+})
+.then(server => {
+  // Getting Service...
+  return server.getPrimaryService('713d0000-503e-4c75-ba94-3148f18d941e');
+})
+.then(service => {
+  //document.getElementById("textViewer").innerHTML = "primaryService passed!";
+  bleService = service;
+  alert("primaryService passed!");
+  // Getting Characteristic...
+  return bleService.getCharacteristic('713d0003-503e-4c75-ba94-3148f18d941e');
+})
+
+.then(characteristic => {
+  //alert('> Found write characteristic');
+  document.getElementById("textViewer").innerHTML = "Found write characteristic"
+  writeCharacteristic = characteristic; 
+
+  // Get read characteristic
+  return bleService.getCharacteristic('713d0002-503e-4c75-ba94-3148f18d941e');
+})
+.then(characteristic => {
+    myCharacteristic = characteristic;
+    return myCharacteristic.startNotifications().then(() => {
+      //alert('> Notifications started');
+      //document.getElementById("textViewer").innerHTML = "Notifications started";
+      myCharacteristic.addEventListener('characteristicvaluechanged',
+        handleNotifications);
+    });
+  })
+.then(() => {
+  alert('Notifications have been started.');
+})
+
+.catch(error => { alert(error); });
+    
+    writeButton.addEventListener('click', function () {
+          // Get the bytes for the text
+          let encoder = new TextEncoder("utf-8");
+          // Add line feed + carriage return chars to text
+          //let text = encoder.encode(message.value + '\u000A\u000D');
+          let text = encoder.encode('hello');
+          writeCharacteristic.writeValue(text);
+        }); 
+
+function handleNotifications(event) {
+  let value = event.target.value;
+  var textDecoder = new TextDecoder();
+  // In Chrome 50+, a DataView is returned instead of an ArrayBuffer.
+  //value = value.buffer ? value : new DataView(value);
+  document.getElementById("textViewer").innerHTML = 'Received ' + textDecoder.decode(value);
+  //alert('Value is ' + value.getUint8(0));
+  //let a = [];
+  // Convert raw data bytes to hex values just for the sake of showing something.
+  // In the "real" world, you'd use data.getUint8, data.getUint16 or even
+  // TextDecoder to process raw data bytes.
+  /*
+  for (var i = 0; i < value.byteLength; i++) {
+    a.push('0x' + ('00' + value.getUint8(i).toString(16)).slice(-2));
+  }
+  */
+}
+
+}//on click
+
+/*
+function write() {
+  if (writeCharacteristic) {
+            // Handle one command at a time
+            if (busy) {
+              // Return if another operation pending
+              return Promise.resolve();
+            }
+            busy = true;
+            return writeCharacteristic.writeValue(0x33).then(() => {
+              busy = false;
+            });
+          } else {
+            return Promise.resolve();
+          }
+}
+*/
+/*
+function write() {
+          // Get the bytes for the text
+          let encoder = new TextEncoder("utf-8");
+          // Add line feed + carriage return chars to text
+          //let text = encoder.encode(message.value + '\u000A\u000D');
+          let text = encoder.encode('hello');
+          return writeCharacteristic.writeValue(text);
+        }
+*/  
+   
+function onStopButtonClick() {
+  if (myCharacteristic) {
+    myCharacteristic.stopNotifications().then(() => {
+      alert('> Notifications stopped');
+      myCharacteristic.removeEventListener('characteristicvaluechanged',
+        handleNotifications);
+    });
+  }
+}
+function onDisconnect() {
+   
+  alert('Disconnecting from Bluetooth Device...');
+  bluetoothDevice.gatt.disconnect();
+}
+  
+    </script>
+  </body>
+</html>
